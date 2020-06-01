@@ -1,0 +1,62 @@
+plugins {
+    id "org.sonarqube" version "2.7"
+}
+
+sonarqube {
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: "org.sonarqube"
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+    defaultConfig {
+        applicationId "com.paula.displaymap"
+        minSdkVersion 19
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+
+dependencies {
+    implementation 'com.esri.arcgisruntime:arcgis-android:100.7.0'
+    implementation 'com.esri.arcgisruntime:arcgis-android-toolkit:100.7.0'
+    //implementation files('D:\\paula\\Documents\\NotFun\\Studium\\6.Semester\\Arcgis sdk experiment\\arcgis-runtime-toolkit-android\\arcgis-android-toolkit\\build\\outputs\\aar\\arcgis-android-toolkit-100.7.0-debug.aar')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation "androidx.constraintlayout:constraintlayout:2.0.0-beta4"
+    implementation "androidx.lifecycle:lifecycle-common-java8:2.2.0"
+    testImplementation 'junit:junit:4.13'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation "android.arch.lifecycle:livedata:1.1.1"
+    implementation "android.arch.lifecycle:viewmodel:1.1.1"
+    implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation 'com.google.ar.sceneform:plugin:1.15.0'
+    implementation 'com.google.ar.sceneform:core:1.15.0'
+    //implementation 'com.google.ar:core:1.15.0'
+
+}
