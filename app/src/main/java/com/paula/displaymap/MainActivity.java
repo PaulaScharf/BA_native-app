@@ -23,6 +23,7 @@ import com.esri.arcgisruntime.mapping.view.SpaceEffect;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.symbology.Renderer;
+import com.esri.arcgisruntime.symbology.SceneSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSceneSymbol;
 import com.esri.arcgisruntime.symbology.SceneSymbol.AnchorPosition;
@@ -75,8 +76,7 @@ public class MainActivity extends AppCompatActivity {
         SceneView sceneView = mArView.getSceneView();
 
         // Create and show a scene
-        ArcGISScene mScene = new ArcGISScene("http://www.arcgis.com/home/item.html?id=1aef3789b146485090f16df0a01b78e6");
-        sceneView.setScene(mScene);
+        ArcGISScene mScene = new ArcGISScene(Basemap.createImagery());
 
         //******************************option one: Portal ****************************************
         // create an integrated mesh layer
@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
  */
 // ************************************************* option two: feature layer *******************
-/*
+
         ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable("https://www.arcgis.com/home/item.html?id=1aa6f7b927f7434aaa23d12d07af553d");
         // add feature layer(s)
         FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
@@ -128,9 +128,10 @@ public class MainActivity extends AppCompatActivity {
 
         // set the feature layer to render dynamically to allow extrusion
         featureLayer.setRenderingMode(FeatureLayer.RenderingMode.DYNAMIC);
+        mScene.getLoadSettings().setPreferredPointFeatureRenderingMode(FeatureLayer.RenderingMode.DYNAMIC);
         //create a simple symbol for use in a simple renderer
 
-        SimpleMarkerSceneSymbol symbol = new SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbol.Style.CUBE, Color.RED, 12, 12, 12, AnchorPosition.BOTTOM);
+        SimpleMarkerSceneSymbol symbol = new SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbol.Style.CUBE, Color.RED, 12, 12, 12, AnchorPosition.CENTER);
         SimpleRenderer renderer = new SimpleRenderer(symbol);
         featureLayer.setRenderer(renderer);
 
@@ -140,8 +141,10 @@ public class MainActivity extends AppCompatActivity {
         serviceFeatureTable.queryFeaturesAsync(queryParams, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
 // add the feature layer to the scene
         mScene.getOperationalLayers().add(featureLayer);
-*/
+        sceneView.setScene(mScene);
+
 //*****************************************option three *******************************************
+        /*
         // create a graphics overlay for the scene
         GraphicsOverlay mSceneOverlay = new GraphicsOverlay();
         mSceneOverlay.getSceneProperties().setSurfacePlacement(LayerSceneProperties.SurfacePlacement.RELATIVE_TO_SCENE);
@@ -157,20 +160,31 @@ public class MainActivity extends AppCompatActivity {
 
         // create a graphics overlay for route
         GraphicsOverlay routeOverlay = new GraphicsOverlay();
+        mArView.getSceneView().getGraphicsOverlays().add(routeOverlay);
         // create a placeholder graphic for showing the mission route in mini map
-        SimpleMarkerSceneSymbol symbol = new SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbol.Style.CUBE, Color.RED, 12, 12, 12, AnchorPosition.BOTTOM);
-        Graphic mRouteGraphic = new Graphic( new Point(51.96, 7.62, 1000, sceneView.getSpatialReference()), symbol);
-        routeOverlay.getGraphics().add(mRouteGraphic);
-        Graphic mRouteGraphic2 = new Graphic( new Point( 7.62, 51.96, 1000, sceneView.getSpatialReference()), symbol);
-        routeOverlay.getGraphics().add(mRouteGraphic2);
-        sceneView.getGraphicsOverlays().add(routeOverlay);
 
+        SimpleMarkerSceneSymbol symbol = new SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbol.Style.CUBE, Color.RED, 12, 12, 12, AnchorPosition.BOTTOM);
+        Graphic mRouteGraphic = new Graphic( new Point(51.97212903467239, 7.56045252084732, 1000, sceneView.getSpatialReference()), symbol);
+        routeOverlay.getGraphics().add(mRouteGraphic);
+        Graphic mRouteGraphic2 = new Graphic( new Point( 7.56045252084732, 51.97212903467239, 1000, sceneView.getSpatialReference()), symbol);
+        routeOverlay.getGraphics().add(mRouteGraphic2);
+
+        // display the graphic 3 meters above the ground
+        routeOverlay.getSceneProperties().setSurfacePlacement(LayerSceneProperties.SurfacePlacement.RELATIVE);
+        routeOverlay.getSceneProperties().setAltitudeOffset(3);
+*/
 
         // Create and add an elevation surface to the scene
         ArcGISTiledElevationSource elevationSource = new ArcGISTiledElevationSource(getString(R.string.world_elevation_service_url));
         Surface elevationSurface = new Surface();
         elevationSurface.getElevationSources().add(elevationSource);
         sceneView.getScene().setBaseSurface(elevationSurface);
+        // hide the basemap. The image feed provides map context while navigating in AR
+        elevationSurface.setOpacity(0f);
+
+        // disable plane visualization. It is not useful for this AR scenario.
+        //mArView.getArSceneView().getPlaneRenderer().setEnabled(false);
+        //mArView.getArSceneView().getPlaneRenderer().setVisible(false);
 
         // Allow the user to navigate underneath the surface
         // This would be critical for working underground or on paths that go underground (e.g. a tunnel)
