@@ -24,7 +24,8 @@ import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.symbology.Renderer;
 import com.esri.arcgisruntime.symbology.SceneSymbol;
-import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
+import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
+import com.esri.arcgisruntime.symbology.Symbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSceneSymbol;
 import com.esri.arcgisruntime.symbology.SceneSymbol.AnchorPosition;
 import com.esri.arcgisruntime.symbology.SymbolStyle.*;
@@ -76,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
         SceneView sceneView = mArView.getSceneView();
 
         // Create and show a scene
-        ArcGISScene mScene = new ArcGISScene(Basemap.createImagery());
-
+        ArcGISScene mScene = new ArcGISScene("https://ct.maps.arcgis.com/home/item.html?id=51ecead507054e89bd5a4546da8aad19");
+        sceneView.setScene(mScene);
         //******************************option one: Portal ****************************************
         // create an integrated mesh layer
 /*
@@ -120,8 +121,12 @@ public class MainActivity extends AppCompatActivity {
 
  */
 // ************************************************* option two: feature layer *******************
-
+/*
         ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable("https://www.arcgis.com/home/item.html?id=1aa6f7b927f7434aaa23d12d07af553d");
+        // load all attributes in the service feature table
+        QueryParameters queryParams = new QueryParameters();
+        queryParams.setWhereClause("1=1");
+        serviceFeatureTable.queryFeaturesAsync(queryParams, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
         // add feature layer(s)
         FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
         featureLayer.getSceneProperties().setSurfacePlacement(LayerSceneProperties.SurfacePlacement.RELATIVE_TO_SCENE);
@@ -131,20 +136,21 @@ public class MainActivity extends AppCompatActivity {
         mScene.getLoadSettings().setPreferredPointFeatureRenderingMode(FeatureLayer.RenderingMode.DYNAMIC);
         //create a simple symbol for use in a simple renderer
 
-        SimpleMarkerSceneSymbol symbol = new SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbol.Style.CUBE, Color.RED, 12, 12, 12, AnchorPosition.CENTER);
-        SimpleRenderer renderer = new SimpleRenderer(symbol);
+        //SimpleMarkerSceneSymbol markerSymbol = new SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbol.Style.CUBE, Color.RED, 12, 12, 12, AnchorPosition.CENTER);
+        SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.SQUARE, Color.RED, 10);
+        SimpleRenderer renderer = new SimpleRenderer(markerSymbol);
+        // set renderer extrusion mode to base height, which includes base height of each vertex in calculating z values
+        renderer.getSceneProperties().setExtrusionMode(Renderer.SceneProperties.ExtrusionMode.BASE_HEIGHT);
+// set the attribute used for extrusion (if, for example, the feature layer has an attribute called 'pop2000')
+        renderer.getSceneProperties().setExtrusionExpression("20");
         featureLayer.setRenderer(renderer);
-
-// load all attributes in the service feature table
-        QueryParameters queryParams = new QueryParameters();
-        queryParams.setWhereClause("1=1");
-        serviceFeatureTable.queryFeaturesAsync(queryParams, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
 // add the feature layer to the scene
         mScene.getOperationalLayers().add(featureLayer);
-        sceneView.setScene(mScene);
 
-//*****************************************option three *******************************************
-        /*
+*/
+//***************************************** option three: graphics overlay *******************************************
+// note: a graphics overlay will not work with a feature layer (see: https://developers.arcgis.com/android/latest/guide/symbolize-data.htm)set
+/*
         // create a graphics overlay for the scene
         GraphicsOverlay mSceneOverlay = new GraphicsOverlay();
         mSceneOverlay.getSceneProperties().setSurfacePlacement(LayerSceneProperties.SurfacePlacement.RELATIVE_TO_SCENE);
