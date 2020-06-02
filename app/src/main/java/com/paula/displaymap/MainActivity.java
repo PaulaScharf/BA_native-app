@@ -35,7 +35,7 @@ import com.google.ar.sceneform.Scene;
 public class MainActivity extends AppCompatActivity {
 
     // license with a license key
-    // ArcGISRuntimeEnvironment.setLicense("runtimelite,1000,rud8084462849,none,4N5X0H4AH5KBLMZ59210");
+    // ArcGISRuntimeEnvironment.setLicense("XXX");
     private ArcGISArView mArView;
 
     @Override
