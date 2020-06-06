@@ -9,12 +9,14 @@ import android.os.Bundle;
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
 import com.esri.arcgisruntime.data.QueryParameters;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
+import com.esri.arcgisruntime.internal.jni.CoreBasemap;
 import com.esri.arcgisruntime.layers.ArcGISSceneLayer;
 import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.IntegratedMeshLayer;
 import com.esri.arcgisruntime.mapping.*;
 import com.esri.arcgisruntime.geometry.*;
 import com.esri.arcgisruntime.mapping.view.AtmosphereEffect;
+import com.esri.arcgisruntime.mapping.view.BackgroundGrid;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.LayerSceneProperties;
@@ -22,6 +24,7 @@ import com.esri.arcgisruntime.mapping.view.SceneView;
 import com.esri.arcgisruntime.mapping.view.SpaceEffect;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
+import com.esri.arcgisruntime.symbology.ModelSceneSymbol;
 import com.esri.arcgisruntime.symbology.Renderer;
 import com.esri.arcgisruntime.symbology.SceneSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
@@ -79,50 +82,57 @@ public class MainActivity extends AppCompatActivity {
         // Create and show a scene
         ArcGISScene mScene = new ArcGISScene("https://ct.maps.arcgis.com/home/item.html?id=51ecead507054e89bd5a4546da8aad19");
         sceneView.setScene(mScene);
-        //******************************option one: Portal ****************************************
-        // create an integrated mesh layer
-/*
-        UserCredential credential = new UserCredential("user", "password");
-        Portal portal = new Portal(getString(R.string.arcgis_portal_url));
-        portal.setCredential(credential);
-        portal.addDoneLoadingListener(() -> {
+        loadScene(mScene);
 
-          // check that the portal loaded correctly
-          if (portal.getLoadStatus() == LoadStatus.LOADED) {
+        addElevationSource(mScene);
 
-            // get license info from the portal
-            ListenableFuture<LicenseInfo> licenseFuture = portal.fetchLicenseInfoAsync();
+        // Turn off the space effect and atmosphere effect rendering
+        sceneView.setSpaceEffect(SpaceEffect.TRANSPARENT);
+        sceneView.setAtmosphereEffect(AtmosphereEffect.NONE);
 
-            // listen for the license info from the server
-            licenseFuture.addDoneListener(() -> {
-              try {
-                LicenseInfo licenseInfo = licenseFuture.get();
+        //LocationManager.getLocationManager().addNmeaListener(new InternalNmeaListener());
+    }
 
-                // Get the license as a json string
-                String licenseJson = licenseInfo.toJson();
+    /**
+     * Adds an elevation source to the provided [scene].
+     *
+     * @since 100.6.0
+     */
+    private void addElevationSource(ArcGISScene mScene) {
+        ArcGISTiledElevationSource elevationSource = new ArcGISTiledElevationSource(getString(R.string.world_elevation_service_url));
+        Surface elevationSurface = new Surface();
+        elevationSurface.getElevationSources().add(elevationSource);
+        elevationSurface.setName("baseSurface");
+        elevationSurface.setEnabled(true);
+        BackgroundGrid backgroundGrid = elevationSurface.getBackgroundGrid();
+        backgroundGrid.setColor(Color.TRANSPARENT);
+        backgroundGrid.setGridLineColor(Color.TRANSPARENT);
+        elevationSurface.setNavigationConstraint(NavigationConstraint.STAY_ABOVE);
+        elevationSurface.setOpacity(0f);
+        mScene.setBaseSurface(elevationSurface);
+    }
 
-                // the license string will need to be stored locally for starting
-                // the app when there is no network connection.
-
-                // Apply the license
-                ArcGISRuntimeEnvironment.setLicense(licenseInfo);
-
-              } catch (InterruptedException e) {
-                // error code goes here
-              } catch (ExecutionException e) {
-                // error code goes here
-              }
+    private void loadScene(ArcGISScene mScene) {
+        mScene.loadAsync();
+        mScene.addDoneLoadingListener(() -> {
+            Surface sceneSurface = mScene.getBaseSurface();
+            BackgroundGrid backgroundGrid = sceneSurface.getBackgroundGrid();
+            backgroundGrid.setColor(Color.TRANSPARENT);
+            backgroundGrid.setGridLineColor(Color.TRANSPARENT);
+            sceneSurface.setNavigationConstraint(NavigationConstraint.STAY_ABOVE);
+            sceneSurface.setOpacity(0f);
+            sceneSurface.setEnabled(false);
+            Basemap basemap = mScene.getBasemap();
+            basemap.loadAsync();
+            basemap.addDoneLoadingListener(() -> {
+                LayerList layers = basemap.getBaseLayers();
+                layers.clear();
             });
-          }
         });
-        PortalItem portalItem = new PortalItem(portal, getString(R.string.vricon_integrated_mesh_layer_url));
-        ArcGISSceneLayer layer = new ArcGISSceneLayer(portalItem);
-        mScene.getOperationalLayers().add(layer);
+    }
 
- */
-// ************************************************* option two: feature layer *******************
-/*
-        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable("https://www.arcgis.com/home/item.html?id=1aa6f7b927f7434aaa23d12d07af553d");
+    private void addFeatureLayer(ArcGISScene mScene) {
+        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable("https://www.arcgis.com/home/item.html?id=e342df14ba174e2188d387bc07206cec");
         // load all attributes in the service feature table
         QueryParameters queryParams = new QueryParameters();
         queryParams.setWhereClause("1=1");
@@ -136,75 +146,59 @@ public class MainActivity extends AppCompatActivity {
         mScene.getLoadSettings().setPreferredPointFeatureRenderingMode(FeatureLayer.RenderingMode.DYNAMIC);
         //create a simple symbol for use in a simple renderer
 
-        //SimpleMarkerSceneSymbol markerSymbol = new SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbol.Style.CUBE, Color.RED, 12, 12, 12, AnchorPosition.CENTER);
+        //SimpleMarkerSceneSymbol markerSymbol = new SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbol.Style.TETRAHEDRON, Color.RED, 12, 12, 12, AnchorPosition.CENTER);
         SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.SQUARE, Color.RED, 10);
+        //ModelSceneSymbol markerSymbol = new ModelSceneSymbol("./CathedralGLB_GLTF.glb", 10);
+
         SimpleRenderer renderer = new SimpleRenderer(markerSymbol);
         // set renderer extrusion mode to base height, which includes base height of each vertex in calculating z values
         renderer.getSceneProperties().setExtrusionMode(Renderer.SceneProperties.ExtrusionMode.BASE_HEIGHT);
-// set the attribute used for extrusion (if, for example, the feature layer has an attribute called 'pop2000')
+        // set the attribute used for extrusion (if, for example, the feature layer has an attribute called 'pop2000')
         renderer.getSceneProperties().setExtrusionExpression("20");
         featureLayer.setRenderer(renderer);
-// add the feature layer to the scene
+        // add the feature layer to the scene
         mScene.getOperationalLayers().add(featureLayer);
-
-*/
-//***************************************** option three: graphics overlay *******************************************
-// note: a graphics overlay will not work with a feature layer (see: https://developers.arcgis.com/android/latest/guide/symbolize-data.htm)set
-/*
-        // create a graphics overlay for the scene
-        GraphicsOverlay mSceneOverlay = new GraphicsOverlay();
-        mSceneOverlay.getSceneProperties().setSurfacePlacement(LayerSceneProperties.SurfacePlacement.RELATIVE_TO_SCENE);
-        sceneView.getGraphicsOverlays().add(mSceneOverlay);
-
-        // create renderer to handle updating plane's orientation
-        SimpleRenderer renderer3D = new SimpleRenderer();
-        Renderer.SceneProperties renderProperties = renderer3D.getSceneProperties();
-        renderProperties.setHeadingExpression("[HEADING]");
-        renderProperties.setPitchExpression("[PITCH]");
-        renderProperties.setRollExpression("[ROLL]");
-        mSceneOverlay.setRenderer(renderer3D);
-
-        // create a graphics overlay for route
-        GraphicsOverlay routeOverlay = new GraphicsOverlay();
-        mArView.getSceneView().getGraphicsOverlays().add(routeOverlay);
-        // create a placeholder graphic for showing the mission route in mini map
-
-        SimpleMarkerSceneSymbol symbol = new SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbol.Style.CUBE, Color.RED, 12, 12, 12, AnchorPosition.BOTTOM);
-        Graphic mRouteGraphic = new Graphic( new Point(51.97212903467239, 7.56045252084732, 1000, sceneView.getSpatialReference()), symbol);
-        routeOverlay.getGraphics().add(mRouteGraphic);
-        Graphic mRouteGraphic2 = new Graphic( new Point( 7.56045252084732, 51.97212903467239, 1000, sceneView.getSpatialReference()), symbol);
-        routeOverlay.getGraphics().add(mRouteGraphic2);
-
-        // display the graphic 3 meters above the ground
-        routeOverlay.getSceneProperties().setSurfacePlacement(LayerSceneProperties.SurfacePlacement.RELATIVE);
-        routeOverlay.getSceneProperties().setAltitudeOffset(3);
-*/
-
-        // Create and add an elevation surface to the scene
-        ArcGISTiledElevationSource elevationSource = new ArcGISTiledElevationSource(getString(R.string.world_elevation_service_url));
-        Surface elevationSurface = new Surface();
-        elevationSurface.getElevationSources().add(elevationSource);
-        sceneView.getScene().setBaseSurface(elevationSurface);
-        // hide the basemap. The image feed provides map context while navigating in AR
-        elevationSurface.setOpacity(0f);
-
-        // disable plane visualization. It is not useful for this AR scenario.
-        //mArView.getArSceneView().getPlaneRenderer().setEnabled(false);
-        //mArView.getArSceneView().getPlaneRenderer().setVisible(false);
-
-        // Allow the user to navigate underneath the surface
-        // This would be critical for working underground or on paths that go underground (e.g. a tunnel)
-        elevationSurface.setNavigationConstraint(NavigationConstraint.NONE);
-
-        mScene.setBaseSurface(elevationSurface);
-
-        // Turn off the space effect and atmosphere effect rendering
-        sceneView.setSpaceEffect(SpaceEffect.TRANSPARENT);
-        sceneView.setAtmosphereEffect(AtmosphereEffect.NONE);
-
-        //LocationManager.getLocationManager().addNmeaListener(new InternalNmeaListener());
     }
+/*
+    private void addLayerThroughPortal(ArcGISScene mScene) {
+        UserCredential credential = new UserCredential("user", "password");
+        Portal portal = new Portal(getString(R.string.arcgis_portal_url));
+        portal.setCredential(credential);
+        portal.addDoneLoadingListener(() -> {
 
+            // check that the portal loaded correctly
+            if (portal.getLoadStatus() == LoadStatus.LOADED) {
+
+                // get license info from the portal
+                ListenableFuture<LicenseInfo> licenseFuture = portal.fetchLicenseInfoAsync();
+
+                // listen for the license info from the server
+                licenseFuture.addDoneListener(() -> {
+                    try {
+                        LicenseInfo licenseInfo = licenseFuture.get();
+
+                        // Get the license as a json string
+                        String licenseJson = licenseInfo.toJson();
+
+                        // the license string will need to be stored locally for starting
+                        // the app when there is no network connection.
+
+                        // Apply the license
+                        ArcGISRuntimeEnvironment.setLicense(licenseInfo);
+
+                    } catch (InterruptedException e) {
+                        // error code goes here
+                    } catch (ExecutionException e) {
+                        // error code goes here
+                    }
+                });
+            }
+        });
+        PortalItem portalItem = new PortalItem(portal, getString(R.string.vricon_integrated_mesh_layer_url));
+        ArcGISSceneLayer layer = new ArcGISSceneLayer(portalItem);
+        mScene.getOperationalLayers().add(layer);
+    }
+ */
 }
 
 /* display a web map

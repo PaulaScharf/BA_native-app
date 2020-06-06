@@ -2,5 +2,7 @@
     <string name="app_name">Display Map</string>
     <string name="arcgis_portal_url">https://www.arcgis.com</string>
     <string name="vricon_integrated_mesh_layer_url">1aa6f7b927f7434aaa23d12d07af553d</string>
+    <string name="ao_scene">https://ct.maps.arcgis.com/home/item.html?id=51ecead507054e89bd5a4546da8aad19</string>
+    <string name="ao_sizeMedium">https://www.arcgis.com/home/item.html?id=e342df14ba174e2188d387bc07206cec</string>
     <string name="world_elevation_service_url">"https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"</string>
 </resources>
