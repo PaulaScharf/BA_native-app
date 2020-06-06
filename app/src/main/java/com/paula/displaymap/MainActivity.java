@@ -3,38 +3,21 @@ package com.paula.displaymap;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Color;
-import android.location.LocationManager;
 import android.os.Bundle;
 
-import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
 import com.esri.arcgisruntime.data.QueryParameters;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
-import com.esri.arcgisruntime.internal.jni.CoreBasemap;
-import com.esri.arcgisruntime.layers.ArcGISSceneLayer;
 import com.esri.arcgisruntime.layers.FeatureLayer;
-import com.esri.arcgisruntime.layers.IntegratedMeshLayer;
 import com.esri.arcgisruntime.mapping.*;
-import com.esri.arcgisruntime.geometry.*;
 import com.esri.arcgisruntime.mapping.view.AtmosphereEffect;
 import com.esri.arcgisruntime.mapping.view.BackgroundGrid;
-import com.esri.arcgisruntime.mapping.view.Graphic;
-import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.LayerSceneProperties;
 import com.esri.arcgisruntime.mapping.view.SceneView;
 import com.esri.arcgisruntime.mapping.view.SpaceEffect;
-import com.esri.arcgisruntime.portal.Portal;
-import com.esri.arcgisruntime.portal.PortalItem;
-import com.esri.arcgisruntime.symbology.ModelSceneSymbol;
 import com.esri.arcgisruntime.symbology.Renderer;
-import com.esri.arcgisruntime.symbology.SceneSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
-import com.esri.arcgisruntime.symbology.Symbol;
-import com.esri.arcgisruntime.symbology.SimpleMarkerSceneSymbol;
-import com.esri.arcgisruntime.symbology.SceneSymbol.AnchorPosition;
-import com.esri.arcgisruntime.symbology.SymbolStyle.*;
 import com.esri.arcgisruntime.symbology.SimpleRenderer;
 import com.esri.arcgisruntime.toolkit.ar.*;
-import com.google.ar.sceneform.Scene;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -80,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         SceneView sceneView = mArView.getSceneView();
 
         // Create and show a scene
-        ArcGISScene mScene = new ArcGISScene("https://ct.maps.arcgis.com/home/item.html?id=51ecead507054e89bd5a4546da8aad19");
+        ArcGISScene mScene = new ArcGISScene(getString(R.string.ao_scene));
         sceneView.setScene(mScene);
         loadScene(mScene);
 
@@ -94,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Adds an elevation source to the provided [scene].
-     *
+     * Adds an elevation source to the provided [mScene].
+     * @param mScene
      * @since 100.6.0
      */
     private void addElevationSource(ArcGISScene mScene) {
@@ -104,26 +87,22 @@ public class MainActivity extends AppCompatActivity {
         elevationSurface.getElevationSources().add(elevationSource);
         elevationSurface.setName("baseSurface");
         elevationSurface.setEnabled(true);
-        BackgroundGrid backgroundGrid = elevationSurface.getBackgroundGrid();
-        backgroundGrid.setColor(Color.TRANSPARENT);
-        backgroundGrid.setGridLineColor(Color.TRANSPARENT);
-        elevationSurface.setNavigationConstraint(NavigationConstraint.STAY_ABOVE);
         elevationSurface.setOpacity(0f);
         mScene.setBaseSurface(elevationSurface);
     }
 
+    /**
+     * Loads the scene. Sets the surface to transparent and removes the baselayers
+     * @param mScene
+     */
     private void loadScene(ArcGISScene mScene) {
-        mScene.loadAsync();
         mScene.addDoneLoadingListener(() -> {
             Surface sceneSurface = mScene.getBaseSurface();
             BackgroundGrid backgroundGrid = sceneSurface.getBackgroundGrid();
             backgroundGrid.setColor(Color.TRANSPARENT);
             backgroundGrid.setGridLineColor(Color.TRANSPARENT);
             sceneSurface.setNavigationConstraint(NavigationConstraint.STAY_ABOVE);
-            sceneSurface.setOpacity(0f);
-            sceneSurface.setEnabled(false);
             Basemap basemap = mScene.getBasemap();
-            basemap.loadAsync();
             basemap.addDoneLoadingListener(() -> {
                 LayerList layers = basemap.getBaseLayers();
                 layers.clear();
@@ -132,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addFeatureLayer(ArcGISScene mScene) {
-        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable("https://www.arcgis.com/home/item.html?id=e342df14ba174e2188d387bc07206cec");
+        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(getString(R.string.ao_sizeMedium));
         // load all attributes in the service feature table
         QueryParameters queryParams = new QueryParameters();
         queryParams.setWhereClause("1=1");
