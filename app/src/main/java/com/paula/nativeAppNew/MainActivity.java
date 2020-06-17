@@ -1,4 +1,4 @@
-package com.paula.displaymap;
+package com.paula.nativeAppNew;
 
 import androidx.appcompat.app.AppCompatActivity;
 

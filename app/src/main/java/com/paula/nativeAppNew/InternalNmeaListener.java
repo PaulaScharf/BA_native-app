@@ -1,4 +1,4 @@
-package com.paula.displaymap;// Register the listener
+package com.paula.nativeAppNew;// Register the listener
 
 import android.location.GpsStatus;
 
