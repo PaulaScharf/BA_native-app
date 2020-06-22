@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         serviceFeatureTable.queryFeaturesAsync(queryParams, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
         // add feature layer(s)
         FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
-        featureLayer.getSceneProperties().setSurfacePlacement(LayerSceneProperties.SurfacePlacement.RELATIVE_TO_SCENE);
+        featureLayer.getSceneProperties().setSurfacePlacement(LayerSceneProperties.SurfacePlacement.RELATIVE);
 
         // set the feature layer to render dynamically to allow extrusion
         featureLayer.setRenderingMode(FeatureLayer.RenderingMode.DYNAMIC);
