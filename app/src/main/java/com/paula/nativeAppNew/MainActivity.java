@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         SceneView sceneView = mArView.getSceneView();
 
         // Create and show a scene
-        ArcGISScene mScene = new ArcGISScene(getString(R.string.ao_scene));
+        ArcGISScene mScene = new ArcGISScene(getString(R.string.scene_g5_liberty));
         sceneView.setScene(mScene);
         loadScene(mScene);
 
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addFeatureLayer(ArcGISScene mScene) {
-        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(getString(R.string.ao_sizeMedium));
+        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable("https://www.arcgis.com/home/item.html?id=e342df14ba174e2188d387bc07206cec");
         // load all attributes in the service feature table
         QueryParameters queryParams = new QueryParameters();
         queryParams.setWhereClause("1=1");
