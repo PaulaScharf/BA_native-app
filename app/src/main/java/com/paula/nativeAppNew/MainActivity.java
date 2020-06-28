@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         SceneView sceneView = mArView.getSceneView();
 
         // Create and show a scene
-        ArcGISScene mScene = new ArcGISScene(getString(R.string.scene_g5_liberty));
+        ArcGISScene mScene = new ArcGISScene(getString(R.string.scene_s5_500));
         sceneView.setScene(mScene);
         loadScene(mScene);
 

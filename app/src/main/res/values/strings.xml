@@ -8,4 +8,6 @@
     <string name="scene_g3_palacio">https://ct.maps.arcgis.com/home/item.html?id=b27198f321f642a891cacab4b74ac437</string>
     <string name="scene_g4_empreendimento">https://ct.maps.arcgis.com/home/item.html?id=7c412bb348104e21a032680bd0bb3769</string>
     <string name="scene_g5_liberty">https://ct.maps.arcgis.com/home/item.html?id=9df9e9912bbb418781e7bff01a3e374f</string>
+    <string name="scene_s4_250">https://ct.maps.arcgis.com/home/item.html?id=5ac5d744ecdb4ef18a3f509e69e7f6c8</string>
+    <string name="scene_s5_500">https://ct.maps.arcgis.com/home/item.html?id=5b54857a1e034a91817aa0d832e1449d</string>
 </resources>
