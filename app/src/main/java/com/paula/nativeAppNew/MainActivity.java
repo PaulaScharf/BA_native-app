@@ -5,7 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.graphics.Color;
 import android.os.Bundle;
 
-import com.esri.arcgisruntime.mapping.*;
+import com.esri.arcgisruntime.mapping.ArcGISScene;
+import com.esri.arcgisruntime.mapping.ArcGISTiledElevationSource;
+import com.esri.arcgisruntime.mapping.Basemap;
+import com.esri.arcgisruntime.mapping.LayerList;
+import com.esri.arcgisruntime.mapping.NavigationConstraint;
+import com.esri.arcgisruntime.mapping.Surface;
 import com.esri.arcgisruntime.mapping.view.AtmosphereEffect;
 import com.esri.arcgisruntime.mapping.view.BackgroundGrid;
 import com.esri.arcgisruntime.mapping.view.SceneView;
@@ -54,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         SceneView sceneView = mArView.getSceneView();
 
         // Create and show a scene
-        ArcGISScene mScene = new ArcGISScene(getString(R.string.scene_s5_500));
+        ArcGISScene mScene = new ArcGISScene(getString(R.string.scene_g1_tetrahedron));
         sceneView.setScene(mScene);
         loadScene(mScene);
 
